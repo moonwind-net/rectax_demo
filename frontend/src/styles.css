@@ -1,0 +1,169 @@
+:root {
+  --bg: #f2efe7;
+  --panel: #ffffff;
+  --ink: #14213d;
+  --soft: #5f6b7a;
+  --accent: #c84b31;
+  --line: #d9d5cc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans JP", "Yu Gothic", sans-serif;
+  background: radial-gradient(circle at 20% 10%, #fffdf5 0%, var(--bg) 55%, #e5dfd3 100%);
+  color: var(--ink);
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: linear-gradient(180deg, #1f2a44 0%, #14213d 100%);
+  color: #fff;
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sidebar h1 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  letter-spacing: 0.4px;
+}
+
+.sidebar a {
+  color: #dfe7ff;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+.sidebar a.router-link-active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.content {
+  padding: 26px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+button {
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #6d7a8a;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  padding: 10px 8px;
+  font-size: 14px;
+}
+
+.status {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ece8dc;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sidebar h1 {
+    width: 100%;
+  }
+
+  .content {
+    padding: 14px;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .toolbar {
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .toolbar > * {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  th,
+  td {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+}

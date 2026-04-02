@@ -1,0 +1,31 @@
+services:
+  db:
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${DB_PORT}:5432"
+
+  backend:
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${BACKEND_PORT}:8000"
+
+  paddle-ocr:
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OCR_V3_PORT}:8000"
+    profiles: ["fallback"]
+
+  paddle-ocr-v4:
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${OCR_V4_PORT}:8000"
+
+  receipt-ocr:
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${RECEIPT_OCR_PORT}:8000"
+
+  frontend:
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT}:80"

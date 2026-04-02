@@ -1,0 +1,172 @@
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend-example/db/init.sql:/docker-entrypoint-initdb.d/001-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./backend-example
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      paddle-ocr-v4:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DEBUG: ${DEBUG}
+      APP_HOST: ${APP_HOST}
+      APP_PORT: ${APP_PORT}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES}
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: ${JWT_REFRESH_TOKEN_EXPIRE_DAYS}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+      BOOTSTRAP_ADMIN_DISPLAY_NAME: ${BOOTSTRAP_ADMIN_DISPLAY_NAME}
+      BOOTSTRAP_ADMIN_SYNC_EXISTING: ${BOOTSTRAP_ADMIN_SYNC_EXISTING}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS_JSON}
+      ALLOWED_ORIGIN_REGEX: ${ALLOWED_ORIGIN_REGEX}
+      UPLOAD_DIR: ${UPLOAD_DIR}
+      EXPORT_DIR: ${EXPORT_DIR}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE}
+      UPLOAD_RATE_LIMIT_PER_MINUTE: ${UPLOAD_RATE_LIMIT_PER_MINUTE}
+      UPLOAD_MAX_FILES_PER_REQUEST: ${UPLOAD_MAX_FILES_PER_REQUEST}
+      UPLOAD_MAX_TOTAL_MB_PER_REQUEST: ${UPLOAD_MAX_TOTAL_MB_PER_REQUEST}
+      FOLDER_WATCH_INTERVAL_SECONDS: ${FOLDER_WATCH_INTERVAL_SECONDS}
+      WORKER_POLL_INTERVAL_SECONDS: ${WORKER_POLL_INTERVAL_SECONDS}
+      WORKER_BATCH_SIZE: ${WORKER_BATCH_SIZE}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY}
+      WORKER_MAX_ATTEMPTS: ${WORKER_MAX_ATTEMPTS}
+      WORKER_RETRY_BASE_SECONDS: ${WORKER_RETRY_BASE_SECONDS}
+      WORKER_MAX_QUEUE_DEPTH: ${WORKER_MAX_QUEUE_DEPTH}
+      PADDLE_OCR_TARGET: ${PADDLE_OCR_TARGET}
+      PADDLE_OCR_API_URL_V3: ${PADDLE_OCR_API_URL_V3}
+      PADDLE_OCR_API_URL_V4: ${PADDLE_OCR_API_URL_V4}
+      PADDLE_OCR_API_URL: ${PADDLE_OCR_API_URL}
+      PADDLE_OCR_TIMEOUT_SECONDS: ${PADDLE_OCR_TIMEOUT_SECONDS}
+      RECEIPT_OCR_API_URL: ${RECEIPT_OCR_API_URL}
+      RECEIPT_OCR_TIMEOUT_SECONDS: ${RECEIPT_OCR_TIMEOUT_SECONDS}
+    volumes:
+      - ${HOST_UPLOADS_DIR}:/app/uploads
+      - ${HOST_EXPORTS_DIR}:/app/exports
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/health\").read()'"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  worker:
+    build:
+      context: ./backend-example
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+      paddle-ocr-v4:
+        condition: service_healthy
+    command: ["python", "-m", "app.worker"]
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      DEBUG: ${DEBUG}
+      APP_HOST: ${APP_HOST}
+      APP_PORT: ${APP_PORT}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES}
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: ${JWT_REFRESH_TOKEN_EXPIRE_DAYS}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD}
+      BOOTSTRAP_ADMIN_DISPLAY_NAME: ${BOOTSTRAP_ADMIN_DISPLAY_NAME}
+      BOOTSTRAP_ADMIN_SYNC_EXISTING: ${BOOTSTRAP_ADMIN_SYNC_EXISTING}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS_JSON}
+      ALLOWED_ORIGIN_REGEX: ${ALLOWED_ORIGIN_REGEX}
+      UPLOAD_DIR: ${UPLOAD_DIR}
+      EXPORT_DIR: ${EXPORT_DIR}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE}
+      UPLOAD_RATE_LIMIT_PER_MINUTE: ${UPLOAD_RATE_LIMIT_PER_MINUTE}
+      UPLOAD_MAX_FILES_PER_REQUEST: ${UPLOAD_MAX_FILES_PER_REQUEST}
+      UPLOAD_MAX_TOTAL_MB_PER_REQUEST: ${UPLOAD_MAX_TOTAL_MB_PER_REQUEST}
+      FOLDER_WATCH_INTERVAL_SECONDS: ${FOLDER_WATCH_INTERVAL_SECONDS}
+      WORKER_POLL_INTERVAL_SECONDS: ${WORKER_POLL_INTERVAL_SECONDS}
+      WORKER_BATCH_SIZE: ${WORKER_BATCH_SIZE}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY}
+      WORKER_MAX_ATTEMPTS: ${WORKER_MAX_ATTEMPTS}
+      WORKER_RETRY_BASE_SECONDS: ${WORKER_RETRY_BASE_SECONDS}
+      WORKER_MAX_QUEUE_DEPTH: ${WORKER_MAX_QUEUE_DEPTH}
+      PADDLE_OCR_TARGET: ${PADDLE_OCR_TARGET}
+      PADDLE_OCR_API_URL_V3: ${PADDLE_OCR_API_URL_V3}
+      PADDLE_OCR_API_URL_V4: ${PADDLE_OCR_API_URL_V4}
+      PADDLE_OCR_API_URL: ${PADDLE_OCR_API_URL}
+      PADDLE_OCR_TIMEOUT_SECONDS: ${PADDLE_OCR_TIMEOUT_SECONDS}
+      RECEIPT_OCR_API_URL: ${RECEIPT_OCR_API_URL}
+      RECEIPT_OCR_TIMEOUT_SECONDS: ${RECEIPT_OCR_TIMEOUT_SECONDS}
+    volumes:
+      - ${HOST_UPLOADS_DIR}:/app/uploads
+      - ${HOST_EXPORTS_DIR}:/app/exports
+
+  paddle-ocr:
+    build:
+      context: ./paddle-ocr-service
+      dockerfile: Dockerfile.gpu
+    environment:
+      PADDLE_OCR_PREFER_GPU: ${PADDLE_OCR_PREFER_GPU}
+      PADDLE_OCR_DEBUG_REGISTRATION_CANDIDATES: ${PADDLE_OCR_DEBUG_REGISTRATION_CANDIDATES:-false}
+    gpus: all
+    volumes:
+      - ${HOST_DATA_DIR}/paddle-model-cache:/root/.paddleocr
+    profiles: ["fallback"]
+
+  paddle-ocr-v4:
+    build:
+      context: ./paddle-ocr-service
+      dockerfile: Dockerfile.gpu
+    environment:
+      PADDLE_OCR_PREFER_GPU: ${PADDLE_OCR_PREFER_GPU}
+      PADDLE_OCR_OCR_VERSION: ${PADDLE_OCR_V4_VERSION}
+      PADDLE_OCR_DEBUG_REGISTRATION_CANDIDATES: ${PADDLE_OCR_DEBUG_REGISTRATION_CANDIDATES:-false}
+    gpus: all
+    volumes:
+      - ${HOST_DATA_DIR}/paddle-model-cache-v4:/root/.paddleocr
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/health\").read()'"]
+      interval: 15s
+      timeout: 8s
+      retries: 20
+
+  receipt-ocr:
+    build:
+      context: ./receipt-ocr/app
+      dockerfile: Dockerfile
+    profiles: ["fallback"]
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL}
+      OPENAI_MODEL: ${OPENAI_MODEL}
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/health\").read()'"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

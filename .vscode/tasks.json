@@ -1,0 +1,260 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "docker-compose-up-dev-gpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env up -d --build"
+			]
+		},
+		{
+			"label": "docker-compose-down-dev-gpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env down"
+			]
+		},
+		{
+			"label": "docker-compose-up-prod-gpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml up -d --build"
+			]
+		},
+		{
+			"label": "docker-compose-down-prod-gpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml down"
+			]
+		},
+		{
+			"label": "docker-compose-up-dev-cpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.cpu.yml up -d --build"
+			]
+		},
+		{
+			"label": "docker-compose-down-dev-cpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.override.yml -f docker-compose.cpu.yml down"
+			]
+		},
+		{
+			"label": "docker-compose-up-prod-cpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.cpu.yml up -d --build"
+			]
+		},
+		{
+			"label": "docker-compose-down-prod-cpu",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml -f docker-compose.cpu.yml down"
+			]
+		},
+		{
+			"label": "docker-compose-up-dev",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env up -d --build"
+			]
+		},
+		{
+			"label": "docker-compose-up-prod",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml up -d --build"
+			]
+		},
+		{
+			"label": "docker-compose-down-dev",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env down"
+			]
+		},
+		{
+			"label": "docker-compose-down-prod",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml down"
+			]
+		},
+		{
+			"label": "inspect-rectax-frontend",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker ps --format '{{.Names}} {{.Image}}' | grep rectax-frontend || true && docker exec rectax-frontend nginx -v 2>&1 || true && docker top rectax-frontend || true"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "inspect-rectax-paddle-ocr",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker ps -a --filter name=rectax-paddle-ocr --format 'table {{.Names}}\t{{.Status}}\t{{.Image}}' && echo '---' && docker logs --tail=200 rectax-paddle-ocr 2>&1 | tail -n 120"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "verify-paddle-cache-mount",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; set -e; HOST_DIR='/mnt/d/WSL2/AI/RecTax/paddle-model-cache'; CTN_DIR='/root/.paddleocr'; echo '=== host count ==='; find \"$HOST_DIR\" -type f 2>/dev/null | wc -l; echo '=== container count ==='; docker exec rectax-paddle-ocr sh -lc 'find \"'\"'\"'$CTN_DIR'\"'\"'\" -type f 2>/dev/null | wc -l'; echo '=== sample(host) ==='; find \"$HOST_DIR\" -type f 2>/dev/null | head -n 5; echo '=== sample(container) ==='; docker exec rectax-paddle-ocr sh -lc 'find \"'\"'\"'$CTN_DIR'\"'\"'\" -type f 2>/dev/null | head -n 5'"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "rectax-health-snapshot",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; echo '=== compose ps ==='; docker compose ps; echo '=== backend health ==='; curl -sS http://127.0.0.1:8000/health || true; echo; echo '=== paddle health ==='; curl -sS http://127.0.0.1:8011/health || true; echo; echo '=== frontend head ==='; curl -I -sS http://127.0.0.1:8080 | head -n 1 || true"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "rectax-health-check-all",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; set -e; FAIL=0; check_json(){ NAME=\"$1\"; URL=\"$2\"; if curl -fsS \"$URL\" >/dev/null; then echo \"[OK] $NAME $URL\"; else echo \"[FAIL] $NAME $URL\"; FAIL=1; fi; }; check_head(){ NAME=\"$1\"; URL=\"$2\"; if curl -fsSI \"$URL\" >/dev/null; then echo \"[OK] $NAME $URL\"; else echo \"[FAIL] $NAME $URL\"; FAIL=1; fi; }; echo '=== compose ps ==='; docker compose --env-file .env ps || true; echo '=== health checks ==='; check_json backend http://127.0.0.1:8000/health; check_json paddle-ocr-v3 http://127.0.0.1:8011/health; check_json paddle-ocr-v4 http://127.0.0.1:8012/health; check_head frontend http://127.0.0.1:8080; exit $FAIL"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "rebuild-backend-v3-gpu-stack",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; docker compose --env-file .env up -d --build backend"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "ocr-compare-last-upload",
+			"type": "shell",
+			"command": "wsl",
+			"args": [
+				"-u",
+				"root",
+				"--",
+				"bash",
+				"-lc",
+				"cd /mnt/d/WSL2/AI/RecTax; echo '=== v3 ==='; curl -sS -X POST -F \"file=@uploads/IMG20260328145126.jpg\" http://127.0.0.1:8011/ocr/; echo; echo '=== v4 ==='; curl -sS -X POST -F \"file=@uploads/IMG20260328145126.jpg\" http://127.0.0.1:8012/ocr/; echo"
+			],
+			"isBackground": false,
+			"group": "test"
+		}
+	]
+}

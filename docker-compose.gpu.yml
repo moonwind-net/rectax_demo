@@ -1,0 +1,17 @@
+services:
+  paddle-ocr:
+    build:
+      context: ./paddle-ocr-service
+      dockerfile: Dockerfile.gpu
+    environment:
+      PADDLE_OCR_PREFER_GPU: "true"
+    gpus: all
+
+  paddle-ocr-v4:
+    build:
+      context: ./paddle-ocr-service
+      dockerfile: Dockerfile.gpu
+    environment:
+      PADDLE_OCR_PREFER_GPU: "true"
+      PADDLE_OCR_OCR_VERSION: "PP-OCRv4"
+    gpus: all

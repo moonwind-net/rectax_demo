@@ -1,0 +1,48 @@
+name: PyPI Release
+
+# https://help.github.com/en/actions/reference/events-that-trigger-workflows
+on: # Trigger the workflow on push or pull request, but only for the main branch
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/release-pypi.yml"
+  release:
+    types: [published]
+
+# based on https://github.com/pypa/gh-action-pypi-publish
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install uv and set Python version
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
+          python-version: "3.10"
+          enable-cache: true
+
+      - name: Build package
+        run: uv build --no-sources
+
+      - name: Verify package artifacts with twine
+        run: uvx twine check --strict dist/*
+
+      - name: Smoke test (wheel)
+        run: uv run --isolated --no-project --with dist/*.whl tests/smoke_test.py
+
+      - name: Smoke test (source distribution)
+        run: uv run --isolated --no-project --with dist/*.tar.gz tests/smoke_test.py
+
+      - name: Publish package
+        if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.pypi_password }}
+        run: uv publish
+
+      - name: Minimize uv cache
+        run: uv cache prune --ci

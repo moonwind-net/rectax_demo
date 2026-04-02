@@ -1,0 +1,86 @@
+name: tesseract-ocr CI
+
+on:
+  push:
+    branches: [main]
+    # paths:
+    #   - 'src/tesseract_ocr/**'
+  pull_request:
+    branches: [main]
+    # paths:
+    #   - 'src/tesseract_ocr/**'
+  workflow_dispatch:
+
+jobs:
+  ruff:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/ruff-action@v3
+
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-26]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install uv and set Python version ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      - name: Install Tesseract OCR (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y tesseract-ocr libtesseract-dev
+          tesseract --version
+
+      - name: Install Tesseract OCR (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install tesseract
+          tesseract --version
+
+      - name: Install Tesseract OCR (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          choco install tesseract --yes
+          $env:Path += ";C:\Program Files\Tesseract-OCR"
+          echo "C:\Program Files\Tesseract-OCR" >> $env:GITHUB_PATH
+          tesseract --help
+
+      - name: Install dependencies
+        run: |
+          uv sync --all-extras --dev
+          uv pip install -r src/tesseract_ocr/requirements.txt
+          uv pip list
+
+      - name: Run tests
+        run: uv run pytest --cov=src/tesseract_ocr tests/tesseract_ocr
+
+      - name: Statistics
+        run: |
+          uv run coverage report
+          uv run coverage xml -o coverage-tesseract-ocr.xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage-tesseract-ocr.xml
+          flags: tesseract_ocr
+          env_vars: OS,PYTHON
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          slug: bhimrazy/receipt-ocr
+
+      - name: Minimize uv cache
+        run: uv cache prune --ci

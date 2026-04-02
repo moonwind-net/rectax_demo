@@ -1,0 +1,30 @@
+services:
+  db:
+    container_name: rectax-db
+    ports:
+      - "${DB_PORT}:5432"
+
+  backend:
+    container_name: rectax-backend
+    ports:
+      - "${BACKEND_PORT}:8000"
+
+  paddle-ocr:
+    container_name: rectax-paddle-ocr
+    ports:
+      - "${OCR_V3_PORT}:8000"
+
+  paddle-ocr-v4:
+    container_name: rectax-paddle-ocr-v4
+    ports:
+      - "${OCR_V4_PORT}:8000"
+
+  receipt-ocr:
+    container_name: rectax-receipt-ocr
+    ports:
+      - "${RECEIPT_OCR_PORT}:8000"
+
+  frontend:
+    container_name: rectax-frontend
+    ports:
+      - "${FRONTEND_PORT}:80"

@@ -1,0 +1,57 @@
+name: Receipt OCR Daily Check
+on:
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - "src/receipt_ocr/**"
+  # pull_request:
+  #   branches: [main]
+  # paths:
+  #   - "src/receipt_ocr/**"
+  schedule:
+    - cron: "0 0 * * *" # Runs every day at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+      OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: true
+
+      - name: Install uv and set Python version
+        uses: astral-sh/setup-uv@v7
+        with:
+          activate-environment: true
+          python-version: "3.12"
+          enable-cache: true
+
+      - name: Install receipt-ocr
+        run: uv pip install receipt-ocr
+
+      - name: Test CLI usage
+        run: |
+          output=$(receipt-ocr images/receipt.jpg)
+          echo "$output"
+          # Basic validation: check if output contains expected fields
+          if echo "$output" | grep -q "merchant_name"; then
+            echo "CLI test passed: structured data extracted"
+          else
+            echo "CLI test failed: no structured data found"
+            exit 1
+          fi
+
+      - name: Test programmatic usage
+        run: |
+          python tests/parity_receipt_ocr/test_response_formats.py
+
+      - name: Minimize uv cache
+        run: uv cache prune --ci

@@ -1,0 +1,21 @@
+# Top-level gitignore for RecTax
+# Protect sensitive env files
+.env
+.env.local
+.env.*.local
+
+# Node
+node_modules/
+dist/
+/.vite
+
+# Python virtualenv
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
